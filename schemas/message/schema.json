@@ -1,0 +1,240 @@
+[
+  {
+    "database": "php_text_message",
+    "index": "messages",
+    "setting": {
+      "analysis": {
+        "analyzer": {
+          "my_analyzer": {
+            "type": "custom",
+            "tokenizer": "vi_tokenizer",
+            "char_filter": [
+              "html_strip", "my_char_filter"
+            ],
+            "filter": [
+              "icu_folding",
+              "lowercase"
+            ]
+          }
+        },
+        "char_filter": {
+          "my_char_filter": {
+            "type": "mapping",
+            "mappings": ["\\n => _"]
+          }
+        }
+      }
+    },
+    "nodes": {
+      "table": "messages",
+      "columns": [
+        "id",
+        "text",
+        "direction",
+        "creationTime",
+        "exCreationTime",
+        "messageStatus",
+        "exMessageStatus",
+        "lastModifiedTime"
+      ],
+      "children": [
+        {
+          "table": "users",
+          "columns": [
+            "id",
+            "firstName",
+            "lastName",
+            "avatar"
+          ],
+          "relationship": {
+            "variant": "object",
+            "type": "one_to_one"
+          },
+          "transform": {
+            "mapping": {
+              "id": {
+                "type": "keyword",
+                "index": false
+              },
+              "firstName": {
+                "type": "text",
+                "index": false
+              },
+              "lastName": {
+                "type": "text",
+                "index": false
+              },
+              "avatar": {
+                "type": "text",
+                "index": false
+              }
+            }
+          }
+        },
+        {
+          "table": "attachments",
+          "columns": [
+            "name",
+            "url",
+            "category",
+            "format"
+          ],
+          "transform": {
+            "mapping": {
+              "name": {
+                "type": "text",
+                "analyzer": "my_analyzer",
+                "boost": 3
+              },
+              "url": {
+                "type": "text",
+                "index": false
+              },
+              "category": {
+                "type": "text",
+                "index": false
+              },
+              "format": {
+                "type": "text",
+                "index": false
+              }
+            }
+          },
+          "relationship": {
+            "variant": "object",
+            "type": "one_to_many"
+          }
+        },
+        {
+          "table": "conversations",
+          "columns": [
+            "id"
+          ],
+          "transform": {
+            "mapping": {
+              "id": {
+                "index": false,
+                "type": "keyword"
+              }
+            }
+          },
+          "relationship": {
+            "variant": "object",
+            "type": "one_to_one"
+          },
+          "children": [
+            {
+              "table": "company_customers",
+              "columns": [
+                "id",
+                "optStatus"
+              ],
+              "transform": {
+                "mapping": {
+                  "id": {
+                    "type": "keyword",
+                    "index": false
+                  },
+                  "optStatus": {
+                    "type": "text",
+                    "index": false
+                  }
+                }
+              },
+              "relationship": {
+                "variant": "object",
+                "type": "one_to_one"
+              },
+              "children": [
+                {
+                  "table": "companies",
+                  "columns": [
+                    "id",
+                    "code",
+                    "name"
+                  ],
+                  "transform": {
+                    "mapping": {
+                      "id": {
+                        "type": "keyword",
+                        "index": false
+                      },
+                      "name": {
+                        "type": "text",
+                        "index": false
+                      },
+                      "code": {
+                        "type": "text"
+                      }
+                    }
+                  },
+                  "relationship": {
+                    "variant": "object",
+                    "type": "one_to_one"
+                  }
+                },
+                {
+                  "table": "customers",
+                  "columns": [
+                    "id",
+                    "phoneNumber"
+                  ],
+                  "transform": {
+                    "mapping": {
+                      "id": {
+                        "type": "keyword",
+                        "index": false
+                      },
+                      "phoneNumber": {
+                        "type": "text",
+                        "index": false
+                      }
+                    }
+                  },
+                  "relationship": {
+                    "variant": "object",
+                    "type": "one_to_one"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "transform": {
+        "mapping": {
+          "id": {
+            "type": "text"
+          },
+          "text": {
+            "type": "text",
+            "analyzer": "my_analyzer",
+            "boost": 3
+          },
+          "direction": {
+            "type": "text",
+            "index": false
+          },
+          "creationTime": {
+            "type": "date"
+          },
+          "lastModifiedTime": {
+            "type": "date",
+            "index": true
+          },
+          "exCreationTime": {
+            "type": "date"
+          },
+          "messageStatus": {
+            "type": "text",
+            "index": false
+          },
+          "exMessageStatus": {
+            "type": "text",
+            "index": false
+          }
+        }
+      }
+    }
+  }
+]

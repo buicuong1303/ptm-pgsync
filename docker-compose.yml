@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  php_text_message-redis-pgsync:
+    image: redis:alpine
+    command: redis-server --requirepass redis --appendonly yes # set password
+    networks:
+      - php_text_message-network
+  pgsync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./runserver.sh
+    sysctls:
+      - net.ipv4.tcp_keepalive_time=200
+      - net.ipv4.tcp_keepalive_intvl=200
+      - net.ipv4.tcp_keepalive_probes=5
+    volumes:
+        - ./schemas:/code/schemas
+        - ./plugins:/code/plugins
+        - ./docker/runserver.sh:/code/runserver.sh
+    networks:
+      - php_text_message-network
+    env_file:
+      - .env
+networks:
+  php_text_message-network:
+    name: php_text_message-network
